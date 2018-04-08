@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html dir="rtl">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<title>Doc - جدول Grid view با سایدبار</title>
+    	<link href="files/fonts.css" rel="stylesheet">
+		<link href="files/normalize.css" rel="stylesheet">
+		<link href="files/style.css" rel="stylesheet">
+	</head>
+	<body>
+		<section>
+            <div style="text-align: center;margin-bottom: 60px">« به نام خداوند بخشنده مهربان »</div>
+            <a href="../Source/index.html" target="_blank" class="showDemo">مشاهده دمو</a>
+			<h1>جدول Grid view با سایدبار و کنترلر تایم لاین</h1>
+			<h2>این چیست؟</h2>
+			جدول Grid view با سایدبار ، یک جدول از داده هاست که با یک کنترلر در ساید بار کار میکند ، کاربر می تواند با استفاده از کنترلر های موجود در ساید بار دادها را فیلتر نموده و مشاهده نماید ، این سیستم با داده های فارسی به خوبی سازگاری داشته و حتی اعداد فارسی و الفبای فارسی را هم به درستی مرتب سازی می نماید.
+			
+			<h2>نصب</h2>
+			نیاز به نصب خاصی ندارد ، تنها با فراخوانی کدهای برنامه می توان از این سیستم استفاده نمود.
+			
+			<h2>کتابخانه های مورد استفاده</h2>
+			از BootStrap[css] , Jquery , DataTable , ionRangeSlider , moments.js استفاده شده است . در کنار این کتابخانه ها ۲ فایل App.css , App.js کد نویسی های خود برنامه فارغ از کتابخانه ها را شامل میشوند. 
+            <br/><br/>
+            داده های فارسی و تقویم شمسی بصورت کامل در این سیستم سازگاری دارند و از کتابخانه مشهور moment.js استفاده شده است .
+            <br/><br/>
+            در این سیستم ionRangeSlider برای اولین بار RTL شده است و این راست چین شدن برای داده های نوع تاریخ هم انجام شده است ، کلیه کنترلر های کتابخانه dataTable نیز به صورت مجزا bind شده اند و در ساید بار کاربر قابل دسترس هستند.
+			
+            <br/><br/>
+
+            یکی دیگر از نکته های حائز اهمیت در این سیستم اتوماتیک بودن تمام بخش های فیلترینگ هست ، به این صورت که اگر کاربر به جدول داده ها یک مقدار جدید که مقداری بیشتر از بیشترین داده و یا کمتر از کمترین داده موجود در جدول داشته باشد اضافه کند ، فیلترینگ های سیستم ، معیار های max یا min را همان داده قرار می دهند .
+
+            <h2>تکنولوژی ها</h2>
+			از Html5 , css3 به شکل صحیح بهره گیری شده است . کدهای نوشته شده validate (jigsaw , validator , jshint) بوده و فارغ از خطا هستند. این سیستم واکنش گرا می باشد و در صفحات موبایل و تبلت به درستی نمایش داده میشود.
+
+
+			<h2>بررسی کدها و نکات رعایت شده</h2>
+			فایل App.js کلیات این سیستم را شامل میشود پس با تحلیل آن شروع میکنیم ، در فایل App.js در ابتدا یک کلاس تعریف میکنیم و محتویات کل js برنامه را درون آن می نویسیم ، کدها تکه تکه گذاشته شده اند تا هر بخش توضیح داده شود در صورت نیاز می توانید در انتهای این صفحه تمام کدهای App.js را یکجا مشاهده نمایید .
+            <pre class="js h150">
+
+!function () {
+    "use strict";
+
+    var DataGridTimeLine = {
+        
+            </pre>
+            سپس کد های شروع و اجرا را می نویسیم . برنامه را به چند بخش تقسیم می کنیم . initialize ، build ، events و توابع و کلاس های اصلی سیستم . بخش initialize برای لود کلیات برنامه به کار رفته است ، در ابتدا بررسی میکنیم که برنامه قبلا initialize شده است یا خیر و سپس initialize می کنیم :
+            <pre class="js h200">
+    initialized: false,
+
+    KharidTable: null,
+    data: [],
+
+    initialize: function () {
+        if (this.initialized === false) {
+            this.initialized = true;
+            this.build();
+            this.events();
+        }
+    },
+            </pre>
+            خب میرسیم به بدنه های اصلی کلاس (البته متغیر ها و چیزهای کوچیک رو توضیح نمیدم تا سریع رد بشیم) . بدنه اصلی تابع build رو مشاهده میکنیم :
+            <pre class="js h400">
+
+    build: function () {
+
+        // convert english digits to persian digits
+        String.prototype.toFaDigit = function () {
+            return this.replace(/\d+/g, function (digit) {
+                var ret = "";
+                var i;
+                for (i = 0; i < digit.length; i += 1) {
+                    ret += String.fromCharCode(digit.charCodeAt(i) + 1728);
+                }
+                return ret;
+            });
+        };
+
+        // convert persian digits to english digits
+        String.prototype.toEnDigit = function () {
+            return this.replace(/[\u06F0-\u06F9]+/g, function (digit) {
+                var ret = "";
+                var i;
+                for (i = 0; i < digit.length; i += 1) {
+                    ret += String.fromCharCode(digit.charCodeAt(i) - 1728);
+                }
+                return ret;
+            });
+        };
+
+            </pre>
+            تا همین جا رو مرور کنیم :
+
+            اینجا ۲ تابع دیده میشه این توابع وظیفه تبدیل اعداد پارسی به انگلیسی و بالعکس را دارند که در محل مناسب استفاده شدن آنها را خواهیم دید.
+			<br/><br/>
+			بعد از این توابع ، از یک کلاس برای ایجاد خریداران استفاده می کنیم , این تابع (kharidar.addUser) ما را در سادگی ایجاد یک خرید جدید برای کاربر راحت میسازد :
+			<pre class="js">
+
+    // Create Dummy kharidars :)
+
+    var kharidar = new this.Kharidar();
+
+    this.data = [
+        kharidar.addUser("احمد علی زاده", "گوشی سامسونگ", "19", "1395/02/01", "تحویل داده شده"),
+        kharidar.addUser("مهدی پورقلی", "گوشی سامسونگ", "12", "1395/01/21", "تحویل داده شده"),
+        kharidar.addUser("حسین صادقی", "گوشی سامسونگ", "21", "1395/01/13", "تحویل داده شده"),
+        kharidar.addUser("علیرضا سعیدی", "کسیه برنج", "76", "1395/07/12", "تحویل داده شده"),
+        kharidar.addUser("هانیه احمدی", "گوشی سامسونگ", "12", "1395/08/27", "تحویل داده شده"),
+        kharidar.addUser("هانیه احمدی", "گوشی سامسونگ", "12", "1395/08/27", "در باربری"),
+        kharidar.addUser("جعفر رضایی", "سیستم عامل مک", "12", "1395/05/18", "در باربری"),
+        kharidar.addUser("جعفر رضایی", "سیستم عامل مک", "32", "1395/04/12", "در باربری"),
+        kharidar.addUser("تست تستی", "محصول تست", "45", "1395/04/17", "تحویل داده شده"),
+        kharidar.addUser("عیسی احمدیان", "رنگ گواش", "32", "1395/03/12", "تحویل داده شده"),
+        kharidar.addUser("زهرا پورمحمد", "لوازم آرایشی", "32", "1395/04/12", "تحویل داده شده"),
+        kharidar.addUser("مرتضی نصیری", "کوله پشتی", "72", "1395/04/12", "در دست بررسی"),
+        kharidar.addUser("امیر کمالیان", "فرش دست بافت", "53", "1395/04/12", "در دست بررسی"),
+        kharidar.addUser("پویا مهری", "کتاب نهج البلاغه", "56", "1395/04/12", "ارسال شده"),
+        kharidar.addUser("حسین محمدزاده", "خودکار Canco", "32", "1395/06/30", "تحویل داده شده"),
+        kharidar.addUser("مهدی مرادی", "کفش آدیداس", "32", "1395/04/12", "در دست بررسی"),
+        kharidar.addUser("علی غیبتی", "کیف تمام چرم", "32", "1395/04/12", "در دست بررسی"),
+        kharidar.addUser("حمید قلیزاده", "آموزش زبان", "32", "1395/04/12", "ارسال شده"),
+        kharidar.addUser("جعفر رضایی", "سیستم عامل مک", "32", "1395/04/12", "تحویل داده شده"),
+        kharidar.addUser("مهرداد مناف نژاد", "تلویزیون LED", "14", "1395/04/12", "تحویل داده شده"),
+        kharidar.addUser("حسین محمدی", "سیستم عامل مک", "30", "1395/04/12", "ارسال شده"),
+        kharidar.addUser("احد علیزاده", "سیستم عامل مک", "10", "1395/02/12", "ارسال شده"),
+        kharidar.addUser("حسین محمدی", "سیستم عامل مک", "30", "1395/04/12", "تحویل داده شده"),
+        kharidar.addUser("احد علیزاده", "سیستم عامل مک", "100", "1395/04/12", "تحویل داده شده")
+    ];
+
+			</pre>
+            کلاسی که آبجکت kharidar ازش ساخته شده در بخش پایانی کلاس اصلی برنامه به اسم Kharidar قرار دارد.
+			برای قابل فهم شدن کدها اون کلاس رو اینجا میزارم :
+            <pre class="js">
+    Kharidar: function () {
+        this.addUser = function (name, product, tedad, date, status) {
+            this.name = name;
+            this.product = product;
+            this.tedad = tedad.toFaDigit();
+            this.date = date.toFaDigit();
+            this.status = status;
+
+            return [this.name, this.product, this.tedad, this.date, this.status];
+        };
+    }  
+            </pre>
+            این کلاس خریداران dummy میسازه ، همانطور که مشاهده می کنید تابع تبدیل اعداد به فارسی در این کلاس به کار رفته است و ما میتوانیم اعداد را در فرمت فارسی و صحیح ایرانی مشاهده کنیم (چیزی که ساختنش کلی خطا برای سیستم مرتب سازی به همراه داشت ولی مرتفع شد).
+            <br/>
+			خب حالا داده های مورد نیاز ساخته شده اند و می توانیم از آنها استفاده کنیم .
+			<br/><br/>
+			کد بعدی که بهش میرسیم نوع farsi-num , farsi-string را برای کتابخانه datatable اضافه میکند ، همانطور که مشاهده می شود از تابع toEnDigit اینجا هم در نوع farsi-num استفاده شده است ، میخواهیم اعداد فارسی قبل از ارسال به مرتب سازی به انگلیسی تبدیل شوند.
+			<pre class="js h500">
+
+    // Create correct sorting types with farsi digits
+    $.extend( $.fn.dataTableExt.oSort, {
+        "farsi-num-pre": function (a) {
+            var x = String(a).replace(/<[\s\S]*?>/g, "").toEnDigit();
+            return parseFloat(x);
+        },
+        "farsi-num-asc": function (a, b) {
+            return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+        },
+        "farsi-num-desc": function (a, b) {
+            return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+        }
+    });
+
+    // Create correct sorting types with farsi string
+    $.extend( $.fn.dataTableExt.oSort, {
+        "farsi-string-pre": function (a) {
+            return GetUniCode(a.toLowerCase());
+        },
+        "farsi-string-asc": function (a, b) {
+            return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+        },
+        "farsi-string-desc": function (a, b) {
+            return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+        }
+    });
+			</pre>
+
+            <Br/><Br/>
+			آخرین بخش های build برای نمایش مقادیر بین دو مولفه اومدیم  بخش جستجوی dataTable سه تا تابع push کردیم تا باهاشون به ترتیب : تعداد خرید - تاریخ خرید و نام کاربری اعضا رو فیلتر کنیم ، البته این سه تا مثال رو کار کردیم تا فیلتر کردن نوع داده های عددی ، تاریخی ، حروفی رو نشون بدیم ، کدها رو ببنیم :
+			<pre class="js h500">
+
+    $.fn.dataTableExt.search.push(
+        function( settings, data, dataIndex ) {
+            var min = parseInt( $('#minBuys').val(), 10 );
+            var max = parseInt( $('#maxBuys').val(), 10 );
+            var buys = parseFloat( data[2].toEnDigit() ) || 0; // use data for the buys column
+     
+            if ( ( isNaN( min ) &amp;&amp; isNaN( max ) ) ||
+                 ( isNaN( min ) &amp;&amp; buys <= max ) ||
+                 ( min <= buys &amp;&amp; isNaN( max ) ) ||
+                 ( min <= buys &amp;&amp; buys <= max ) )
+            {
+                return true;
+            }
+            return false;
+        }
+    );
+
+
+    $.fn.dataTableExt.search.push(
+        function( settings, data, dataIndex ) {
+            var min = parseInt($('#minDate').val(), 10);
+            var max = parseInt($('#maxDate').val(), 10);
+            var dateInTable = parseInt( data[3].toEnDigit().replace(/\//g, ""), 10) || 0; // use data for the age column
+            
+            if ( ( isNaN( min ) &amp;&amp; isNaN( max ) ) ||
+                 ( isNaN( min ) &amp;&amp; dateInTable <= max ) ||
+                 ( min <= dateInTable   &amp;&amp; isNaN( max ) ) ||
+                 ( min <= dateInTable   &amp;&amp; dateInTable <= max ) )
+            {
+                return true;
+            }
+            return false;
+        }
+    );
+
+
+    $.fn.dataTableExt.search.push(
+        function( settings, data, dataIndex ) {
+            var min = GetUniCode($('#minULetter').val()).slice(-2);
+            var max = GetUniCode($('#maxULetter').val()).slice(-2);
+            var dateInTable = GetUniCode( data[0][0].toLowerCase()).slice(-2) || 0; // use data for the username column
+            
+
+            if ( min <= dateInTable   && dateInTable <= max )
+            {
+                return true;
+            }
+            return false;
+        }
+    );
+
+},
+
+			</pre>
+            <Br/><Br/>
+            میرسیم به بخش events , در این بخش اصلی ترین رخدادی که داریم ready بودن document هست و داخل این رخداد ابتدا مقادیر پیش فرض و تنظیمات کلی رو انجام میدیم : 
+            <pre class="js h200">
+
+    events: function () {
+        
+        $(document).ready(function () {
+
+            var selectedRowsCount = 0;
+            // reset timeline values
+            $("#minAge , #minAge , #minDate , #maxDate").prop("value" , "");
+            $("#maxULetter").prop("value" , "ی");
+            $("#minULetter").prop("value" , "آ");
+
+            </pre>
+            <br/><br/>
+			KharidTable رو به صورت global در کلاس اصلی برنامه تعریف کرده ایم تا با قرار دادن جدول grid در آن مدیریت صحیحی را در تمام برنامه روی داده ها داشته باشیم .
+			<br/><br/>
+			ایجاد جدول داده ها با dataTable :
+			<pre class="js h400">
+    DataGridTimeLine.KharidTable = $(".datatable-fanavard").DataTable({
+        data: DataGridTimeLine.data,
+        "searching": true,
+        "ordering": true,
+        "paginate": true,
+        "pageLength": 12,
+        "order": [[3, "asc"]],
+        "fnDrawCallback": function () {
+            $(".dataTables_filter").hide();
+        },
+        "fnCreatedRow": function (nRow, aData) {
+           $(nRow).attr("data-value", aData[0]);
+        },
+        "columnDefs": [
+            {type: "farsi-num", targets: [2]},
+            {type: "farsi-string", targets: [0, 1, 4]}
+        ]
+    });
+
+			</pre>
+            مقادیر بیشینه و کمینه ستونه های مدنظرمون رو بدست می آریم :
+            <pre class="js h300">
+
+    var t = DataGridTimeLine.KharidTable;
+
+    // Get columns maximum and minimum values
+    var minBuy = t.column('.buyCount').data().sort()[0].toEnDigit();
+    var maxBuy = t.column('.buyCount').data().sort().reverse()[0].toEnDigit();
+
+    var minDate = t.column('.buyDate').data().sort()[0].toEnDigit();
+    var maxDate = t.column('.buyDate').data().sort().reverse()[0].toEnDigit();
+
+            </pre>
+            اولین اسلایدر فیلتر کننده مون رو که برای فیلتر کردن تعداد خرید هست تعریف میکنیم ، در این بخش برای راست چین کردن تلاش زیادی شده است و برای اولین بار ionRangeSlider راست چین شده است :
+            <pre class="js">
+
+    // Buys Count Slider
+    $("#buyRangeSlider").ionRangeSlider({
+        type: "double",
+        min: minBuy,
+        max: maxBuy,
+        keyboard: true,
+        onFinish: function (data) {
+            var value = $("#buyRangeSlider").prop("value");
+            var minMaxBuy = value.toString().split(";");
+            $('#maxAge').val(maxBuy - minMaxBuy[0] + parseInt(minBuy));
+            $('#minAge').val(maxBuy - minMaxBuy[1] + parseInt(minBuy));
+            
+            var sortKind = DataGridTimeLine.getSortingKind(2);
+            t.order([2, sortKind]).draw();
+        },
+        prettify: function (num) {
+            if(Number.isInteger(num)){
+                num = (maxBuy - num) + parseInt(minBuy);
+                return num;
+            }
+        }
+    });
+            </pre>
+            برای راحتی بیشتر کاربر ، هنگامی که فیلترینگ اعمال شد داده های جدول بر اساس تعداد خرید مرتب میشوند و برای اینکه حالت مرتب سازی کاربر را سردرگم نکند ، نوع مرتب سازی تعریف شده کاربر ابتدا دریافت و سپس مرتب سازی انجام میشود ، تابع getSortingKind مسئول دریافت نوع مرتب سازی است که n را به عنوان ورودی میگیرد و با تحلیل کلاس نوع مرتب سازی را برگشت می دهد ، این تابع در اواخر کدهای کلاس جزو توابع اصلی می باشد.
+            <br/><br/>
+
+
+
+            بخش دیگری که فیلترینگ داریم ، برای تاریخ های خرید کاربران است‌ ، در این بخش نیز نکته های ذکر شده برای فیلترینگ تعداد خرید رعایت شده است :
+            <pre class="js h500">
+
+    var minDateUnix = moment(minDate, 'jYYYY/jM/jD').format("X").toEnDigit();
+    var maxDateUnix = moment(maxDate, 'jYYYY/jM/jD').format("X").toEnDigit();
+
+    // Date Slider
+    $("#dateRangeSlider").ionRangeSlider({
+        type: "double",
+        min: minDateUnix,
+        max: maxDateUnix,
+        grid: true,
+        force_edges: true,
+        onFinish: function (data) {
+            var value = $("#dateRangeSlider").prop("value");
+            var minMaxDate = value.toString().split(";");
+
+            var farsiMin = (parseInt(maxDateUnix.toEnDigit()) - minMaxDate[0])+ parseInt(minDateUnix.toEnDigit());
+            var farsiMax = (parseInt(maxDateUnix.toEnDigit()) - minMaxDate[1])+ parseInt(minDateUnix.toEnDigit());
+
+            var correctTimePersianMin = moment(farsiMin, "X").locale("fa").format("jYYYYjMMjDD");
+            var correctTimePersianMax = moment(farsiMax, "X").locale("fa").format("jYYYYjMMjDD");
+
+            $('#maxDate').val(correctTimePersianMin.toEnDigit());
+            $('#minDate').val(correctTimePersianMax.toEnDigit());
+
+
+            var sortKind = DataGridTimeLine.getSortingKind(3);
+            t.order([3, sortKind]).draw();
+
+        },
+        prettify: function (num) {
+            num = (maxDateUnix - num) + parseInt(minDateUnix);
+            var m = moment(num, "X").locale("fa");
+            return m.format("jYY/jM/jD");
+        }
+    });
+            </pre>
+            در این بخش از moment.js استفاده میکنیم و تاریخ های شمسی را برای کارکرد صحیح در سیستم مورد استفاده قرار می دهیم .
+
+            <br/><br/>
+
+
+
+            بخش آخر فیلترینگ ، فیلترسازی نام کاربری است که با الفبای فارسی بازه های حروف را مشخص کنیم و اسامی خریداران بر اساس آن فیلتر می شوند ، توجه شود که بعد از فیلتر شدن هنوز امکان مرتب سازی با ستون های دیگر یا اعمال فیلتر های دیگر و یا جستجوی متن در جدول فراهم است ، کد های این بخش رو هم مشاهده کنیم :
+            <pre class="js h500">
+
+    // User Names Slider
+    $("#userLetterRangeSlider").ionRangeSlider({
+        type: "double",
+        min: 0,
+        max: 32,
+        grid: true,
+        grid_num:8,
+        onFinish: function (data) {
+            var value = $("#userLetterRangeSlider").prop("value");
+            var minMaxLetter = value.toString().split(";");
+            $('#maxULetter').val(a[32-minMaxLetter[0]]);
+            $('#minULetter').val(a[32-minMaxLetter[1]]);
+
+            var sortKind = DataGridTimeLine.getSortingKind(0);
+            t.order([0, sortKind]).draw();
+        },
+        prettify: function (num) {
+            return a[32-num];
+        }
+    });
+            </pre>
+            در این بخش حروف فارسی را با آرایه a که یک آرایه از حروف فارسی است میسازیم ، به عبارت دیگر ما ایندکس ها را پیشمایش میکنیم که از ۰ تا ۳۲ می باشند و برای نمایش مقادیر آن ایندکس ها را نمایش می دهیم .
+            سپس برای مقایسه و فیلتر سازی حروف را به unicode تبدیل میکنیم و بر اساس عدد مقایسه میکنیم و نمایش می دهیم .
+                
+            <br/><br/>
+			binding برای جستجو گر : 
+			<pre class="js h150">
+    // Extra Search field in sidebar
+    $("#myInputTextField").bind("keyup", function () {
+        DataGridTimeLine.KharidTable.search($(this).val()).draw();
+    });
+    		</pre>
+			<br/>
+			مابقی کد ها نیز با comment مشخص شده اند و در آخر کلاس بسته شده است . توابع اصلی کلاس همانطور که در خلال صحبت ها ذکر شد درج شده اند و تابع initialize اجرا شده است .
+
+			<pre class="js h500">
+
+                // Select table rows and show count
+                $(document).on("click", ".datatable-fanavard tbody tr", function () {
+                    if ($(this).hasClass("selected")) {
+                        $(this).removeClass("selected");
+                        selectedRowsCount -= 1;
+                    } else {
+                        $(this).addClass("selected");
+                        selectedRowsCount += 1;
+                    }
+                    $("#selectedRowsCount").html(selectedRowsCount);
+                });
+
+                // Make better paging with bs btn-group
+                $(".dataTables_paginate").addClass("btn-group");
+
+            });
+
+        },
+
+        Kharidar: function () {
+            this.addUser = function (name, product, tedad, date, status) {
+                this.name = name;
+                this.product = product;
+                this.tedad = tedad.toFaDigit();
+                this.date = date.toFaDigit();
+                this.status = status;
+
+                return [this.name, this.product, this.tedad, this.date, this.status];
+            };
+        },
+
+        getSortingKind: function(n){
+            // Get current sort kind to keep
+            var el = $(".datatable-fanavard &gt; thead th:nth-child("+(n+1)+")");
+            if(el.hasClass("sorting_desc")){
+                return "desc";
+            }else{
+                return "asc";
+            }
+        }       
+    };
+
+    DataGridTimeLine.initialize();
+}();
+			</pre>
+
+            <br/>
+            <hr/><br/>
+            احتمالا توضیحات داده شده خیلی ناقص و کلی باشه احتمالا برای همین کل سورس App.js رو مجددا اینجا به صورت یکجا درج میکنم تا مشاهده کاملی داشته باشین  :
+            
+            <pre class="js h500">
+
+!function () {
+    "use strict";
+    var DataGridTimeLine = {
+
+        initialized: false,
+
+        KharidTable: null,
+        data: [],
+
+        initialize: function () {
+            if (this.initialized === false) {
+                this.initialized = true;
+                this.build();
+                this.events();
+            }
+        },
+
+        build: function () {
+            // convert english digits to persian digits
+            String.prototype.toFaDigit = function () {
+                return this.replace(/\d+/g, function (digit) {
+                    var ret = "";
+                    var i;
+                    for (i = 0; i &lt; digit.length; i += 1) {
+                        ret += String.fromCharCode(digit.charCodeAt(i) + 1728);
+                    }
+                    return ret;
+                });
+            };
+
+            // convert persian digits to english digits
+            String.prototype.toEnDigit = function () {
+                return this.replace(/[\u06F0-\u06F9]+/g, function (digit) {
+                    var ret = "";
+                    var i;
+                    for (i = 0; i &lt; digit.length; i += 1) {
+                        ret += String.fromCharCode(digit.charCodeAt(i) - 1728);
+                    }
+                    return ret;
+                });
+            };
+
+            // Create Dummy kharidars :)
+
+            var kharidar = new this.Kharidar();
+
+            this.data = [
+                kharidar.addUser("احمد علی زاده", "گوشی سامسونگ", "19", "1395/02/01", "تحویل داده شده"),
+                kharidar.addUser("مهدی پورقلی", "گوشی سامسونگ", "12", "1395/01/21", "تحویل داده شده"),
+                kharidar.addUser("حسین صادقی", "گوشی سامسونگ", "21", "1395/01/13", "تحویل داده شده"),
+                kharidar.addUser("علیرضا سعیدی", "کسیه برنج", "76", "1395/07/12", "تحویل داده شده"),
+                kharidar.addUser("هانیه احمدی", "گوشی سامسونگ", "12", "1395/08/27", "تحویل داده شده"),
+                kharidar.addUser("هانیه احمدی", "گوشی سامسونگ", "12", "1395/08/27", "در باربری"),
+                kharidar.addUser("جعفر رضایی", "سیستم عامل مک", "12", "1395/05/18", "در باربری"),
+                kharidar.addUser("جعفر رضایی", "سیستم عامل مک", "32", "1395/04/12", "در باربری"),
+                kharidar.addUser("تست تستی", "محصول تست", "45", "1395/04/17", "تحویل داده شده"),
+                kharidar.addUser("عیسی احمدیان", "رنگ گواش", "32", "1395/03/12", "تحویل داده شده"),
+                kharidar.addUser("زهرا پورمحمد", "لوازم آرایشی", "32", "1395/04/12", "تحویل داده شده"),
+                kharidar.addUser("مرتضی نصیری", "کوله پشتی", "72", "1395/04/12", "در دست بررسی"),
+                kharidar.addUser("امیر کمالیان", "فرش دست بافت", "53", "1395/04/12", "در دست بررسی"),
+                kharidar.addUser("پویا مهری", "کتاب نهج البلاغه", "56", "1395/04/12", "ارسال شده"),
+                kharidar.addUser("حسین محمدزاده", "خودکار Canco", "32", "1395/06/30", "تحویل داده شده"),
+                kharidar.addUser("مهدی مرادی", "کفش آدیداس", "32", "1395/04/12", "در دست بررسی"),
+                kharidar.addUser("علی غیبتی", "کیف تمام چرم", "32", "1395/04/12", "در دست بررسی"),
+                kharidar.addUser("حمید قلیزاده", "آموزش زبان", "32", "1395/04/12", "ارسال شده"),
+                kharidar.addUser("جعفر رضایی", "سیستم عامل مک", "32", "1395/04/12", "تحویل داده شده"),
+                kharidar.addUser("مهرداد مناف نژاد", "تلویزیون LED", "14", "1395/04/12", "تحویل داده شده"),
+                kharidar.addUser("حسین محمدی", "سیستم عامل مک", "30", "1395/04/12", "ارسال شده"),
+                kharidar.addUser("احد علیزاده", "سیستم عامل مک", "10", "1395/02/12", "ارسال شده"),
+                kharidar.addUser("حسین محمدی", "سیستم عامل مک", "30", "1395/04/12", "تحویل داده شده"),
+                kharidar.addUser("احد علیزاده", "سیستم عامل مک", "100", "1395/04/12", "تحویل داده شده")
+            ];
+
+
+
+            // Create correct sorting types with farsi digits
+            $.extend( $.fn.dataTableExt.oSort, {
+                "farsi-num-pre": function (a) {
+                    var x = String(a).replace(/&lt;[\s\S]*?&gt;/g, "").toEnDigit();
+                    return parseFloat(x);
+                },
+                "farsi-num-asc": function (a, b) {
+                    return ((a &lt; b) ? -1 : ((a &gt; b) ? 1 : 0));
+                },
+                "farsi-num-desc": function (a, b) {
+                    return ((a &lt; b) ? 1 : ((a &gt; b) ? -1 : 0));
+                }
+            });
+
+            // Create correct sorting types with farsi string
+            $.extend( $.fn.dataTableExt.oSort, {
+                "farsi-string-pre": function (a) {
+                    return GetUniCode(a.toLowerCase());
+                },
+                "farsi-string-asc": function (a, b) {
+                    return ((a &lt; b) ? -1 : ((a &gt; b) ? 1 : 0));
+                },
+                "farsi-string-desc": function (a, b) {
+                    return ((a &lt; b) ? 1 : ((a &gt; b) ? -1 : 0));
+                }
+            });
+            
+            $.fn.dataTableExt.search.push(
+                function( settings, data, dataIndex ) {
+                    var min = parseInt( $('#minBuys').val(), 10 );
+                    var max = parseInt( $('#maxBuys').val(), 10 );
+                    var buys = parseFloat( data[2].toEnDigit() ) || 0; // use data for the buys column
+             
+                    if ( ( isNaN( min ) &amp;&amp; isNaN( max ) ) ||
+                         ( isNaN( min ) &amp;&amp; buys &lt;= max ) ||
+                         ( min &lt;= buys   &amp;&amp; isNaN( max ) ) ||
+                         ( min &lt;= buys   &amp;&amp; buys &lt;= max ) )
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            );
+                        
+            $.fn.dataTableExt.search.push(
+                function( settings, data, dataIndex ) {
+                    var min = parseInt($('#minDate').val(), 10);
+                    var max = parseInt($('#maxDate').val(), 10);
+                    var dateInTable = parseInt( data[3].toEnDigit().replace(/\//g, ""), 10) || 0; // use data for the date column
+                    
+                    if ( ( isNaN( min ) &amp;&amp; isNaN( max ) ) ||
+                         ( isNaN( min ) &amp;&amp; dateInTable &lt;= max ) ||
+                         ( min &lt;= dateInTable   &amp;&amp; isNaN( max ) ) ||
+                         ( min &lt;= dateInTable   &amp;&amp; dateInTable &lt;= max ) )
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            );
+
+            $.fn.dataTableExt.search.push(
+                function( settings, data, dataIndex ) {
+                    var min = GetUniCode($('#minULetter').val()).slice(-2);
+                    var max = GetUniCode($('#maxULetter').val()).slice(-2);
+                    var dateInTable = GetUniCode( data[0][0].toLowerCase()).slice(-2) || 0; // use data for the username column
+                    
+
+                    if ( min &lt;= dateInTable   &amp;&amp; dateInTable &lt;= max )
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            );
+            
+        },
+
+        events: function () {
+            
+            $(document).ready(function () {
+
+                var selectedRowsCount = 0;
+                // reset timeline values
+                $("#minBuys , #minBuys , #minDate , #maxDate").prop("value" , "");
+                $("#maxULetter").prop("value" , "ی");
+                $("#minULetter").prop("value" , "آ");
+
+                DataGridTimeLine.KharidTable = $(".datatable-fanavard").DataTable({
+                    data: DataGridTimeLine.data,
+                    "searching": true,
+                    "ordering": true,
+                    "paginate": true,
+                    "pageLength": 14,
+                    "order": [[3, "asc"]],
+                    "fnDrawCallback": function () {
+                        $(".dataTables_filter").hide();
+                    },
+                    "fnCreatedRow": function (nRow, aData) {
+                       $(nRow).attr("data-value", aData[0]);
+                    },
+                    "columnDefs": [
+                        {type: "farsi-num", targets: [2]},
+                        {type: "farsi-string", targets: [0, 1, 4]}
+                    ]
+                });
+
+                var t = DataGridTimeLine.KharidTable;
+
+                // Get columns maximum and minimum values
+                var minBuy = t.column('.buyCount').data().sort()[0].toEnDigit();
+                var maxBuy = t.column('.buyCount').data().sort().reverse()[0].toEnDigit();
+
+                var minDate = t.column('.buyDate').data().sort()[0].toEnDigit();
+                var maxDate = t.column('.buyDate').data().sort().reverse()[0].toEnDigit();
+
+
+                // Count Slider
+                $("#buyRangeSlider").ionRangeSlider({
+                    type: "double",
+                    min: minBuy,
+                    max: maxBuy,
+                    keyboard: true,
+                    onFinish: function (data) {
+                        var value = $("#buyRangeSlider").prop("value");
+                        var minMaxBuy = value.toString().split(";");
+                        $('#maxBuys').val(maxBuy - minMaxBuy[0] + parseInt(minBuy));
+                        $('#minBuys').val(maxBuy - minMaxBuy[1] + parseInt(minBuy));
+
+                        var sortKind = DataGridTimeLine.getSortingKind(2);
+                        t.order([2, sortKind]).draw();
+                    },
+                    prettify: function (num) {
+                        if(Number.isInteger(num)){
+                            num = (maxBuy - num) + parseInt(minBuy);
+                            return num;
+                        }
+                    }
+                });
+
+
+                var minDateUnix = moment(minDate, 'jYYYY/jM/jD').format("X").toEnDigit();
+                var maxDateUnix = moment(maxDate, 'jYYYY/jM/jD').format("X").toEnDigit();
+
+                // Date Slider
+                $("#dateRangeSlider").ionRangeSlider({
+                    type: "double",
+                    min: minDateUnix,
+                    max: maxDateUnix,
+                    grid: true,
+                    force_edges: true,
+                    onFinish: function (data) {
+                        var value = $("#dateRangeSlider").prop("value");
+                        var minMaxDate = value.toString().split(";");
+
+                        var farsiMin = (parseInt(maxDateUnix.toEnDigit()) - minMaxDate[0])+ parseInt(minDateUnix.toEnDigit());
+                        var farsiMax = (parseInt(maxDateUnix.toEnDigit()) - minMaxDate[1])+ parseInt(minDateUnix.toEnDigit());
+
+                        var correctTimePersianMin = moment(farsiMin, "X").locale("fa").format("jYYYYjMMjDD");
+                        var correctTimePersianMax = moment(farsiMax, "X").locale("fa").format("jYYYYjMMjDD");
+
+                        $('#maxDate').val(correctTimePersianMin.toEnDigit());
+                        $('#minDate').val(correctTimePersianMax.toEnDigit());
+
+                        var sortKind = DataGridTimeLine.getSortingKind(3);
+                        t.order([3, sortKind]).draw();
+                    },
+                    prettify: function (num) {
+                        num = (maxDateUnix - num) + parseInt(minDateUnix);
+                        var m = moment(num, "X").locale("fa");
+                        return m.format("jYY/jM/jD");
+                    }
+                });
+                
+                // User Names Slider
+                $("#userLetterRangeSlider").ionRangeSlider({
+                    type: "double",
+                    min: 0,
+                    max: 32,
+                    grid: true,
+                    grid_num:8,
+                    onFinish: function (data) {
+                        var value = $("#userLetterRangeSlider").prop("value");
+                        var minMaxLetter = value.toString().split(";");
+                        $('#maxULetter').val(a[32-minMaxLetter[0]]);
+                        $('#minULetter').val(a[32-minMaxLetter[1]]);
+
+                        var sortKind = DataGridTimeLine.getSortingKind(0);
+                        t.order([0, sortKind]).draw();
+                    },
+                    prettify: function (num) {
+                        return a[32-num];
+                    }
+                });
+
+                // Extra Search field in sidebar
+                $("#myInputTextField").bind("keyup", function () {
+                    t.search($(this).val()).draw();
+                });
+
+                // Select table rows and show count
+                $(document).on("click", ".datatable-fanavard tbody tr", function () {
+                    if ($(this).hasClass("selected")) {
+                        $(this).removeClass("selected");
+                        selectedRowsCount -= 1;
+                    } else {
+                        $(this).addClass("selected");
+                        selectedRowsCount += 1;
+                    }
+                    $("#selectedRowsCount").html(selectedRowsCount);
+                });
+
+
+                // Make better paging with bs btn-group
+                $(".dataTables_paginate").addClass("btn-group");
+
+            });
+
+        },
+
+        Kharidar: function () {
+            this.addUser = function (name, product, tedad, date, status) {
+                this.name = name;
+                this.product = product;
+                this.tedad = tedad.toFaDigit();
+                this.date = date.toFaDigit();
+                this.status = status;
+
+                return [this.name, this.product, this.tedad, this.date, this.status];
+            };
+        },
+        getSortingKind: function(n){
+            var el = $(".datatable-fanavard &gt; thead th:nth-child("+(n+1)+")");
+            if(el.hasClass("sorting_desc")){
+                return "desc";
+            }else{
+                return "asc";
+            }
+        }    
+    };
+
+    DataGridTimeLine.initialize();
+    
+}();
+            </pre>
+			<br/>
+			یک نکته دیگه که علاوه بر نکات موجود در بخش <b>بالای صفحه</b> ، در این سیستم وجود دارد این است که کاربر می تواند با کلیک روی یک سطر آن را انتخاب نموده و با اعمال کردن مرتب سازی های مختلف آن سطر را در موقعیت های مختلف بررسی نماید .
+
+			<h2>دمو</h2>
+			برای مشاهده دمو روی لینک زیر کلیک کنید :
+			<a href="../Source/index.html" title="demo" target="_blank">Demo</a>
+			<br/>
+			<br/>
+		</section>
+
+
+		
+        <!-- add basic CodeMirror functionality -->
+        <script src="files/jquery.min.js" ></script>
+        <link rel="stylesheet" href="files/codemirror-5.14.2/lib/codemirror.css" />
+        <link rel="stylesheet" href="files/codemirror-5.14.2/theme/ambiance.css">
+        <script src="files/codemirror-5.14.2/lib/codemirror.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- add Javascript-mode dependencies -->
+        <script src="files/codemirror-5.14.2/mode/javascript/javascript.js" type="text/javascript" charset="utf-8"></script>
+        <script src="files/codemirror-5.14.2/mode/xml/xml.js" type="text/javascript" charset="utf-8"></script>
+        <script src="files/codemirror-5.14.2/mode/htmlmixed/htmlmixed.js" type="text/javascript" charset="utf-8"></script>
+        <script src="files/codemirror-5.14.2/mode/css/css.js" type="text/javascript" charset="utf-8"></script>
+
+
+
+		<script type="text/javascript">
+
+		var panels = {};
+		var numPanels = 0 ;
+		$(document).ready(function () {
+			$("pre.html").each(function(){
+				var value = $(this).text();
+				$(this).empty();
+				window.i = CodeMirror($(this).get(0), {
+			        value: value,
+					mode: "text/html",
+			        readOnly: true,
+					theme: "ambiance" ,
+			        styleActiveLine: true,
+			        lineNumbers: true,
+					lineWrapping: false
+				});
+			});
+
+			$("pre.js").each(function(){
+				var value = $(this).text();
+				$(this).empty();
+				window.i = CodeMirror($(this).get(0), {
+			        value: value,
+					mode: "text/javascript",
+			        readOnly: true,
+					theme: "ambiance" ,
+			        styleActiveLine: true,
+			        lineNumbers: true,
+					lineWrapping: false
+				});
+			});
+		});
+
+	   </script>
+	
+	</body>
+</html>

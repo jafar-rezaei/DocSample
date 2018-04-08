@@ -1,0 +1,23 @@
+html{direction:rtl}
+body{text-align:center;font-size:14px;font-family:'BYekan',sans-serif;line-height:1.8}
+h1,h2,h3,h4{margin:10px 0;font-weight:400}
+section{background:#f7f7f7;border:solid #ccc;border-width:0 1px;margin:0 auto;width:90%;max-width:850px;padding:10px;text-align:justify}
+pre{text-align:left;direction:ltr;font-family:inherit;border-radius:3px;color:#333}
+h2{margin-top:45px}
+.h150{height:150px}
+.h200{height:200px}
+.h350{height:350px}
+.h400{height:400px}
+.h500{height:500px}
+pre.h150 > .CodeMirror{height:150px}
+pre.h200 > .CodeMirror{height:200px}
+pre.h350 > .CodeMirror{height:350px}
+pre.h400 > .CodeMirror{height:400px}
+pre.h500 > .CodeMirror{height:500px}
+#editorTemplate{font-size:9pt;position:relative;display:block;direction:ltr;width:100%;text-align:left;max-height:600px;border:solid 1px #bbb}
+#editorTemplate .CodeMirror{max-height:500px}
+.panel-editor{background:#4d4d4d;color:#fff;padding:5px 10px!important}
+.panel-editor a{color:#fff}
+.panel-editor>span{float:right;direction:rtl}
+.showDemo{text-decoration:none;margin:10px 5px 0 0 ;display:inline-block;float:left;background:#000;border-radius: 4px;color: #fff;padding: 3px 5px}
+.showDemo:hover{background: #d20505;}
