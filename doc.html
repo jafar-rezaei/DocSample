@@ -1013,7 +1013,7 @@ this.getCaretCoordinates = function (textarea, mode, options) {
 	    این متد برای بدست آوردن موقعیت caret (نشانگر تایپ) در صفحه است که در position , 'absolute' مورد استفاده قرار میگیرد.
 	    <br/><br/>
 	    متد gabi_content :
-	    <pre class="js h300">
+	    <pre class="js h250">
 /**
  * Get content of element
  * @param element
@@ -1026,23 +1026,325 @@ this.gabi_content = function (element) {
 	    این متد برای تبدیل کدهای html داخل تگ هایی که contentEditable هستند به معادل transpose شده هست که بتوانیم اندازه کنیم .
 	    
 	    <br/><br/>
+	    متد replaceLastText :
+	    <pre class="js h300">
+/**
+ * Replace last occurence of string with new one
+ * @param badtext
+ * @param str
+ * @param icon
+ * @returns {*}
+ */
+this.replaceLastText = function (badtext, str, icon) {
+   //...
+};
+	    </pre>
+	    این متد برای جایگزینی شکلک انتخاب شده کاربر در input یا textarea و یا تگ های دیگر کاربر می باشد . دقت شود که در صورتی که روی contentEditable 
+	    درج شکلک انجام می دهیم کد Html شکلک درج میشود و نه خود محتوای آن .
+
+
+
+	    <br/><br/>
+	    متد setEndOfContenteditable :
+	    <pre class="js h200">
+/**
+ * Set caret to end position of content editable
+* @param contentEditableElement
+ */
+this.setEndOfContenteditable = function (contentEditableElement) {
+   //...
+};
+	    </pre>
+	    این متد برای انتقال موقعیت نشانگر تایپ به آخر سطر می باشد .
+
+
+
+	    <br/><br/>
+	    و در آخر متد build :
+	    <pre class="js h200">
+/**
+* Select editor element with class search emoji
+* @type {HTMLElement | null}
+*/
+this.build = function () {
+   //...
+};
+	    </pre>
+	    برای initialize کردن ایونت ها و linstener های اصلی برنامه می باشد و کدهای این بخش را بررسی دقیق خواهیم کرد.<br/>
+	    داخل این متد را اگر نگاهی بیندازیم در ابتدا مشاهده میکنیم که بررسی اجرای اول و کدهای مربوط به آن نوشته شده است :
+	    <pre class="js">
+var searchEmoji = document.querySelector(EmojiManager.settings.selector),
+settings = EmojiManager.settings;
+
+searchEmoji.addEventListener("click", function () {
+if (EmojiManager.firstRun) {
+
+    EmojiManager.firstRun = false;
+
+    if(document.querySelector("#chooseEmoji") === null) {
+	var chooserDiv = document.createElement('div');
+	chooserDiv.setAttribute('id', 'chooseEmoji');
+	document.querySelector('body').appendChild(chooserDiv);
+    }
+
+    this.innerHTML = '';
+}
+});
+	    </pre>
+	    searchEmoji را برابر با سلکتور محلی که میخواهیم در آن جستجوی شکلک داشته باشیم میگذاریم و روی آن کلیک شدن را شنود میکنیم و در صورت
+	    اولین اجرا بودن منوی انتخاب کننده شکلک را به body اضافه میکنیم. سپس روی همین المنت به شنود کردن input کد مینویسیم که 
+	    در هر بار تایپ شدن کاراکتر در لیست شکلک ها جستجو انجام شده و نتیجه نمایش داده شود :
+	    <pre class="js h500">
+/*
+Add event listener to event
+*/
+searchEmoji.addEventListener("input", function (e) {
+
+
+
+/*
+@Todo : add input field support
+*/
+var tagName = this.tagName.toLowerCase(),
+isDiv = (tagName === 'div'),
+isInput = (tagName === 'input'),
+allValue = isDiv ? EmojiManager.gabi_content(this).trim() : this.value,
+allHtml = this.innerHTML,
+lastSpace = allValue.lastIndexOf(" "),
+typedValue = allValue.substring(lastSpace + 1).toLowerCase().replace("<br/>", ""),
+chooseEmoji = document.getElementById("chooseEmoji"),
+foundedOne = false,
+counter = 0,
+isEnglish = /[^A-Za-z0-9]/g.test(typedValue);
+
+
+/*
+Make list empty and search for emoji
+*/
+chooseEmoji.innerHTML = '<div style="background:' + settings.background + ';' + settings.textColor + ';" class="titleOfBlock ' + ((settings.draggable) ? "draggableTitle" : "") + ((settings.rtl) ? " emojiIsRTL" : "") + '">' + settings.title + '<span class="closeEmojiChooser">×</span></div><ul></ul>';
+
+for (var i = Object.keys(jsonOfEmojies).length - 1; i >= 0; i--) {
+var keywordName = (!isEnglish ? jsonOfEmojies[i].keywords : jsonOfEmojies[i].faKeywords);
+
+if (
+typedValue.length > 0 &&
+(
+    (!isEnglish && jsonOfEmojies[i].keywords.indexOf(typedValue) > -1) ||
+    (isEnglish && jsonOfEmojies[i].faKeywords.indexOf(typedValue) > -1)
+) &&
+counter < 12
+) {
+foundedOne = true;
+counter++;
+
+
+var li = document.createElement("li"),
+    emojiCode = "<span class='ec ec-" + jsonOfEmojies[i].name + "'></span>";
+
+li.dataset.name = jsonOfEmojies[i].name;
+li.dataset.content = jsonOfEmojies[i].content;
+li.title = keywordName;
+li.innerHTML = emojiCode + keywordName;
+chooseEmoji.querySelector("ul").appendChild(li);
+
+// click on emoji li
+li.addEventListener("click", function () {
+
+    EmojiManager.settings.afterChoose(this.dataset.name, this);
+
+    var iconSpan = document.createElement("span"),
+	newIcon = "<span class='ec ec-" + this.dataset.name + "' ></span>";
+
+    iconSpan.className = "ec ec-" + this.dataset.name;
+    chooseEmoji.style.display = "none";
+
+
+    // replace old value with
+    if (isDiv) {
+	searchEmoji.innerHTML = EmojiManager.replaceLastText(typedValue, allHtml, newIcon);
+    } else {
+	searchEmoji.value = EmojiManager.replaceLastText(typedValue, allValue, this.dataset.content);
+    }
+
+    EmojiManager.setEndOfContenteditable(searchEmoji);
+
+});
+}
+}
+
+
+/*
+If emoji founded show choosing menu
+*/
+if (foundedOne) {
+
+// show the chooser
+chooseEmoji.style.display = "block";
+
+var topSpace, leftSpace , bottomSpace , rightSpace;
+
+
+// set position
+switch (settings.position) {
+case "absolute" :
+
+    var caret = EmojiManager.getCaretCoordinates(this, 'body', {
+	    isDiv: isDiv,
+	    isInput: isInput
+	}),
+	screenWidth = window.innerWidth
+	    || document.documentElement.clientWidth
+	    || document.body.clientWidth ,
+	menuWidth = chooseEmoji.clientWidth || chooseEmoji.offsetWidth,
+	newPlaceOfLeft = caret['left'] - menuWidth;
+
+
+    /*
+    Do not let suggest menu out of screen
+     */
+    if (screenWidth - newPlaceOfLeft < 0) {
+	newPlaceOfLeft = screenWidth - menuWidth - 10;   // leftest place of page
+    }
+
+
+    topSpace = parseInt(caret['top']) + 30 + 'px';
+    leftSpace = newPlaceOfLeft + 'px';
+    bottomSpace = null;
+    rightSpace = null;
+
+    chooseEmoji.style.position = 'absolute';
+
+    break;
+
+case "fixed-top-right" :
+    chooseEmoji.style.position = 'fixed';
+    bottomSpace = null;
+    rightSpace = '15px';
+    topSpace = '10px';
+    leftSpace = 'auto';
+    break;
+case "fixed-top-left":
+    chooseEmoji.style.position = 'fixed';
+    bottomSpace = null;
+    rightSpace = null;
+    topSpace = '10px';
+    leftSpace = '10px';
+    break;
+case "fixed-bottom-right":
+    chooseEmoji.style.position = 'fixed';
+    bottomSpace = '15px';
+    rightSpace = '15px';
+    topSpace = null;
+    leftSpace = null;
+    break;
+case "fixed-bottom-left":
+    chooseEmoji.style.position = 'fixed';
+    bottomSpace = '15px';
+    rightSpace = null;
+    topSpace = null;
+    leftSpace = '10px';
+    break;
+default:
+    chooseEmoji.style.position = 'fixed';
+    topSpace = '10px';
+    leftSpace = '10px';
+    bottomSpace = null;
+    rightSpace = null;
+
+    break;
+}
+
+chooseEmoji.style.top = topSpace;
+chooseEmoji.style.left = leftSpace;
+chooseEmoji.style.bottom = bottomSpace;
+chooseEmoji.style.right = rightSpace;
+
+
+EmojiManager.settings.afterMenuShow(chooseEmoji);
+
+
+/*
+Handle close menu
+*/
+chooseEmoji.querySelector(".closeEmojiChooser").addEventListener("click", function () {
+EmojiManager.settings.afterClose();
+chooseEmoji.innerText = '';
+});
+
+
+} else {
+chooseEmoji.innerHTML = '';
+chooseEmoji.style.display = 'none';
+}
+
+
+/*
+Enable draggable to selector
+*/
+if (settings.draggable) {
+(function () {
+var initX, initY, firstX, firstY;
+
+chooseEmoji.addEventListener('mousedown', function (e) {
+    e.preventDefault();
+    initX = this.offsetLeft;
+    initY = this.offsetTop;
+    firstX = e.pageX;
+    firstY = e.pageY;
+
+    this.addEventListener('mousemove', dragIt, false);
+
+    window.addEventListener('mouseup', function () {
+	chooseEmoji.removeEventListener('mousemove', dragIt, false);
+    }, false);
+
+}, false);
+
+
+// mobile device support
+chooseEmoji.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    initX = this.offsetLeft;
+    initY = this.offsetTop;
+    var touch = e.touches;
+    firstX = touch[0].pageX;
+    firstY = touch[0].pageY;
+
+    this.addEventListener('touchmove', swipeIt, false);
+
+    window.addEventListener('touchend', function (e) {
+	e.preventDefault();
+	chooseEmoji.removeEventListener('touchmove', swipeIt, false);
+    }, false);
+
+}, false);
+
+function dragIt(e) {
+    this.style.left = initX + e.pageX - firstX + 'px';
+    this.style.top = initY + e.pageY - firstY + 'px';
+}
+
+function swipeIt(e) {
+    var contact = e.touches;
+    this.style.left = initX + contact[0].pageX - firstX + 'px';
+    this.style.top = initY + contact[0].pageY - firstY + 'px';
+}
+})();
+}
+
+
+// do not let regualar functionality
+e.preventDefault();
+
+});
+	    </pre>
 	    
-        /**
-         * Replace last occurence of string with new one
-         * @param badtext
-         * @param str
-         * @param icon
-         * @returns {*}
-         */
-        this.replaceLastText = function (badtext, str, icon) {
-
-
+	    با کمی دقت در کد بالا مشاهده می کنیم که بخش های مربوط به تنظیمات draggable شدن و position مربوط به منوی انتخاب کننده شکلک نیز در این بخش بررسی میشود .
+	    این بخش با استفاده از تنظیمات کاربر منوی شخصی سازی شده را می سازد و نمایش می دهد .
 
 
         
-			<br/>
-			یک نکته دیگه که علاوه بر نکات موجود در بخش <b>بالای صفحه</b> ، در این سیستم وجود دارد این است که کاربر می تواند با کلیک روی یک سطر آن را انتخاب نموده و با اعمال کردن مرتب سازی های مختلف آن سطر را در موقعیت های مختلف بررسی نماید .
-
+	
 			<h2>دمو</h2>
 			برای مشاهده دمو روی لینک زیر کلیک کنید :
 			<a href="../Source/index.html" title="demo" target="_blank">Demo</a>
