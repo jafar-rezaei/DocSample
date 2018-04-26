@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html dir="rtl">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<title>Doc - سیستم مدیریت شکلک ها</title>
+    	<link href="files/fonts.css" rel="stylesheet">
+		<link href="files/normalize.css" rel="stylesheet">
+		<link href="files/style.css" rel="stylesheet">
+	</head>
+	<body>
+		<section>
+            <div style="text-align: center;margin-bottom: 60px">« به نام خداوند بخشنده مهربان »</div>
+            <a href="../Source/index.html" target="_blank" class="showDemo">مشاهده دمو</a>
+			<h1>ماژول مدیریت کننده شکلک (Emoji)</h1>
+			<h2>این چیست؟</h2>
+			ماژول فعلی سیستمی برای مدیریت شکلک های تعریف شده در قالب یک فایل Json به صورت پویا می باشد که این امکان را به ما میدهد که با استفاده از امکان AutoComplete با تایپ نمودن هر کاراکتر از واژه مورد نظرمان ، واژه تایپ شده در لیست شکلک های تعریف شده سیستم جستجو شده و پیشنهاد های موجود به صورت پنجره ای به کاربر نمایش داده شود و کاربر بتواند با کلیک روی هز شکلک ان را به جای واژه تایپ شده جایگزین نماید .
+			
+			<h2>نصب</h2>
+			نیاز به نصب خاصی ندارد ، تنها با فراخوانی کدهای برنامه می توان از این سیستم استفاده نمود.
+			
+			<h2>کتابخانه های مورد استفاده</h2>
+			برای ساخت این ماژول از هیچ کتابخانه خاصی استفاده نشده است و تنها با جاوا اسکریپت خالص و Css3 سخته شده است تا براحتی بتوان در هر سیستمی که مدنظر داشته باشیم از آن استفاده نماییم.
+
+            <br/><br/>
+            برای بدست آوردن لیست شکلک ها از <a href="https://github.com/IonicaBizau/emoji.css" target="_blank">Emoji.css</a> استفاده شده الست.
+
+            <br/><br/>
+        
+			
+            <br/><br/>
+
+
+            <h2>تکنولوژی ها</h2>
+			از Html5 , css3 به شکل صحیح بهره گیری شده است . کدهای نوشته شده validate (jigsaw , validator , jshint) بوده و فارغ از خطا هستند. این سیستم واکنش گرا می باشد و در صفحات موبایل و تبلت به درستی نمایش داده میشود ، پنل نمایش داده شده برای انتخاب شکلک کاملا واکنش گرا می باشد ، این سیستم قابلیت draggable شدن ، رنگ بندی و شخصی سازی بسیار زیادی را به کاربر میدهد و میتواند روی المنت های مختلف (input , textarea , div ,. ..) کار کند ، نمونه ای از تنظیمات این سیستم به شکل زیر است :
+            <pre class="js">
+var defaultOptions = {
+    selector: &#x27;.searchEmoji&#x27;,
+    draggable: true,
+    title: &#x27;&#x627;&#x646;&#x62A;&#x62E;&#x627;&#x628; &#x634;&#x6A9;&#x644;&#x6A9;&#x27;,
+    background: &#x27;#F00000&#x27;,
+    textColor: &#x27;#fff&#x27;,
+    kindOfSearch: &#x27;all&#x27;,   // first , end
+    afterMenuShow: function () {},
+    afterChoose: function () {},
+    afterClose: function () {},
+    rtl: true,
+    position: &#x27;absolute&#x27;,    // absolute , fixed-top-left , fixed-top-right , fixed-bottom-left , fixed-bottom-right
+    debug: false
+};
+            </pre>
+            که کاربر میتواند ، سلکتور مورد نظر - امکان جابجایی پنجره شکلک ها - عنوان پنجره - رنگ بندی آن - نحوه ی جایگیری پنجره ی انتخاب شکلک ها در صغحه و .،. را برای هر آبجکت از کلاس به صورت جداگانه مدیریت کند ، توابع مورد نظر خود را در زمان های مورد نظر اجرا کند ، راست چین بودن را بررسی کند و کلاس را براحتی دیباگ نماید.
+
+
+			<h2>بررسی کدها و نکات رعایت شده</h2>
+            برای لود فایل ها از یک لایبرری شخصی ساخته شده توسط خودم به نام jRun استفاده میکنیم که امکان بارگذاری بدون دردسر و سریع فایل ها را میسر می سازد . (<a href="https://github.com/jafar-rezaei/jRun" target="_blank">سورس github</a>) استفاده از این لایبرری بسیار ساده است و امکان lazyLoading را فراهم میکند . نمونه ی استفاده شده از jRun در صفحه اصلی :
+            <pre class="js h500">
+jRun.init([
+    {url: "emoji/emoji.min.css"},
+    {url: "emoji_json", kind: "Fanavard"},
+    {url: "linerIcons.css", kind: "Icons"},
+    {url: "emoji", kind: "Fanavard"}
+], function () {
+
+    // On input
+    new EmojiManager({
+        selector: '#inputEmojiManager',
+        background: '#6E8FFF',
+        draggable: true,
+        rtl: true,
+        title: 'انتخاب شکلک'
+    });
+
+
+    // On textarea
+    new EmojiManager({
+        selector: '#textAreaEmojiManager',
+        background: '#5de83d',
+        draggable: true,
+        rtl: true,
+        title: 'Emojiyi seç'
+    });
+
+    // On textarea
+    new EmojiManager({
+        selector: '#textAreaEmojiManagerRTL',
+        background: '#2b6c1c',
+        draggable: true,
+        rtl: true,
+        title: 'شکلک انتخاب المغی'
+    });
+
+
+    // On contentEditable
+    new EmojiManager({
+        selector: '#divEmojiManager',
+        draggable: true,
+        background: '#F00000',
+        afterChoose: function (emojiName) {
+            log("emoji : " + emojiName);
+        },
+        position: 'fixed-bottom-left'
+    });
+
+});
+            </pre>
+            به این ترتیب فایل های لازم برای پروژه به صورت promise شده به پروژه اضافه میشوند و امکان track کردن زمان اضافه شدن هر فایل نیز میسر می باشد ، مشاهده میکنیم که پس از لود شدن فایل ها ، با function پاس داده شده میتوان کدهای خود را اجرا نمود و ما از کلاس EmojiManager نوشته شده خود چند مورد را برای تست ساخته ایم
+            <br/>
+
+            سورس لایبرری کوچک ولی بسیار کاربردی jRun به صورت زیر می باشد :
+            <pre class="js h400">
+/**
+ * Main JavaScript file to manage pages js
+ *
+ * @author   : jafar rezaei [bomber.man87@yahoo.com <http://jrjs.ir>]
+ * @updated : 2018/02/20
+ */
+var jRun = {
+
+
+    /**
+     *  jRun version to check updates and force files caching validation
+     */
+    version: "0.1.08",
+
+
+    /**
+     *  Main plugIns that you want to load at page load
+     *  @note : add only main plugIns here and use init
+     *        jRun.plugins = [{
+                url : "jquery/jquery.min" ,
+                kind : "PlugIn"
+              }];
+     */
+    plugins: [],
+
+
+
+    /**
+     * enable system debug mode
+     */
+    debugMode: true,
+
+    /**
+     * allow init files flag , this flag check if main
+     * plugIns loaded already or not and then allow init
+     * the utility or even plug-ins which user want to add.
+     */
+    allowInit: false,
+
+
+    /**
+     * Build whole mechanism of jRun here
+     * system will run it at page load.
+     */
+    build: function () {
+
+        // alias log instead of console.log in dev mode
+        window.log = function (message) {
+            var e = new Error();
+            var stack = e.stack.toString().split(/\r\n|\n/);
+            console.log(message, '          [' + stack[1] + ']');
+        };
+
+        // load main configuration
+        jRun.firstCall = true;
+
+        if(jRun.plugins.length > 0) {
+            jRun.buildPlugIns();
+        }else{
+            jRun.allowInit = true;
+        }
+    },
+
+
+    /**
+     * Build main plug-ins
+     */
+    buildPlugIns: function () {
+        jRun.init(jRun.plugins, function () {
+            jRun.allowInit = true;
+        });
+    },
+
+
+    /**
+     * Add specific file (css,js) to our page
+     * @param urls
+     * @param callback
+     * @TODO ADD multi URL of a specific kind support
+     */
+    init: function (urls , callback ) {
+
+        if(jRun.allowInit || jRun.firstCall) {
+            jRun.firstCall = false;
+            var waiting = false,
+                loadFinishCount = 0,
+                endsWith = function (str, suffix) {
+                    if (str === null || suffix === null)
+                        return false;
+                    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+                },
+                scapeFilename = function (name) {
+                    if (name.indexOf("/") > 0) {
+                        name = name.substr(0, name.indexOf("/"));
+                    }
+                    return name.replace([".min", "/", ".", "-"], "");
+                },
+                loadFinish = function (inOneUrlArray) {
+                    if(!inOneUrlArray)
+                        loadFinishCount++;
+
+                    if (urls.length === loadFinishCount) {
+                        if (callback !== undefined && typeof callback === "function") {
+                            callback();
+                            log("StartCallbak ........")
+                        } else {
+                            var callbackError = new Error();
+                            var callbackStack = callbackError.stack.toString().split(/\r\n|\n/);
+                            throw "CallBack should be a function " + (typeof callback) + " given!          [" + callbackStack[1] + "]";
+                        }
+                    }
+                },
+
+                loadFile = function (url, wait, kind, after, inOneUrlArray) {
+
+                    if(!waiting) {
+
+                        // add file added flag
+                        var fileCorrectName = scapeFilename(url);
+                        jRun["has" + fileCorrectName] = true;
+
+                        kind = kind === "" ? "" : kind + "/";
+
+                        var type = endsWith(url, ".css") ? "css" : "js";
+                        var fileReference = document.createElement((type === "js" ? 'script' : 'link'));
+
+                        url = endsWith(url , "." + type) ? url : url + "." + type;
+
+                        if (type === "js") {
+                            fileReference.src = "public/Javascript/" + kind + url + "?Ver=" + jRun.version;
+                        } else {
+                            fileReference.type = "text/css";
+                            fileReference.rel = "stylesheet";
+                            fileReference.href = "public/Css/" + kind + url + "?Ver=" + jRun.version;
+                        }
+
+                        fileReference.onload = function(){
+                            if (jRun.debugMode) {
+                                log('Loaded script ...' + inOneUrlArray + " - " + url);
+                            }
+
+                            if(typeof loadFinish == "function")
+                                loadFinish(inOneUrlArray);
+                        };
+
+
+                        fileReference.onerror = function () {
+                            if (jRun.debugMode) {
+                                log('Error loading script !');
+                            }
+                        };
+
+                        document.head.appendChild(fileReference);
+                    }else{
+                        // sleep a bit and call your self again after 100 milliSeconds
+                        setTimeout(function () {
+                            loadFile(url, wait, after);
+                        } , 100);
+                    }
+                };
+
+
+            urls = (typeof urls === "string") ? [urls] : urls;
+
+
+
+            for (var i = 0; i < urls.length; i++) {
+
+                var address, wait, after, kind = '';
+
+                // is an object and has some dependency
+                wait = urls[i].hasOwnProperty('wait') ? urls[i]['wait'] : undefined;
+                kind = urls[i].hasOwnProperty('kind') ? urls[i]['kind'] : '';
+                after = urls[i].hasOwnProperty('after') ? urls[i]['after'] : undefined;
+                address = urls[i].hasOwnProperty('url') ? urls[i]['url'] : urls[i];
+
+                if(Array.isArray(address)){
+
+                    for (var j = address.length - 1; j >= 0; j--) {
+                        var inOneUrlArray =  (j !== 1);
+                        loadFile(address[j], wait, kind, after , inOneUrlArray);
+                    }
+                }else{
+                    loadFile(address, wait, kind, after , false);
+                }
+            }
+
+        }else{
+            // sleep a bit and call your self again after 100 milliSeconds
+            setTimeout(function () {
+                jRun.init(urls , callback , kind);
+            } , 100);
+        }
+
+    }
+
+};
+
+jRun.build();
+            </pre>
+            توجه شود که استفاده از jRun برای این پروژه optional بوده و ما فقط بخاطر ساده تر لود کردن فایل ها با آن کار کرده ایم.
+            <br/>
+            <hr/>
+            <br/>
+            خب به کدهای اصلی برنامه برسیم و تحلیلی از انجام شدن کدها را داشته باشیم ، در ابتدا فایل json حاوی شکلک ها ، کلمات کلیدی آنها و همینطور کد شکلک ها را بررسی میکنیم ، این فایل با نام emoji_json در پوشه Fanavard قرار دارد .
+
+            <pre class="js h400">
+/**
+ * List of emoji icons in json
+ * @type {*[]}
+ */
+var jsonOfEmojies = [
+    {
+        "keywords": "score - perfect - numbers - century - exam - quiz - test - pass - hundred ",
+        "faKeywords": "نمره - کامل - اعداد - قرن - امتحان - مسابقه - آزمون - عبور - صد - 100 ",
+        "name": "100 ",
+        "content": "💯"
+    }, {
+        "keywords": "numbers - blue-square ",
+        "faKeywords": "اعداد - مربع آبی - 1234 ",
+        "name": "1234 ",
+        "content": "🔢"
+    },
+     ...
+];
+            </pre>
+            شکلک ها در یک Object قرار میگیرند که دارای ویژگی های keyword برای کلید کلمات انگلیسی - faKeyword برای کلید کلمات فارسی - name برای نام شکلک استفاده شده و content برای محتوای شکلک می باشد ، که از آنها در جستجو و نمایش شکلک استفاده میکنیم
+			<br/><br/>
+            این فایل json به پروژه الحاق میشود و بعد توسط EmojiManager نوشته شده توسط ما مورد استفاده قرار میگیرد. این کلاس به صورت زیر پیاده سازی شده است :
+            <pre class="js h400">
+/* jshint browser: true */
+
+var EmojiManager;
+(function () {
+
+    EmojiManager = function (options) {
+
+        &#x27;use strict&#x27;;
+
+        /**
+         * Default options of emoji manager
+         * @type {{selector: string, draggable: boolean, title: string, background: string, textColor: string, kindOfSearch: string, afterMenuShow: afterMenuShow, afterChoose: afterChoose, afterClose: afterClose, rtl: boolean, debug: boolean}}
+         */
+        var defaultOptions = {
+            selector: &#x27;.searchEmoji&#x27;,
+            draggable: true,
+            title: &#x27;&#x627;&#x646;&#x62A;&#x62E;&#x627;&#x628; &#x634;&#x6A9;&#x644;&#x6A9;&#x27;,
+            background: &#x27;#F00000&#x27;,
+            textColor: &#x27;#fff&#x27;,
+            kindOfSearch: &#x27;all&#x27;,   // first , end
+            afterMenuShow: function () {},
+            afterChoose: function () {},
+            afterClose: function () {},
+            rtl: true,
+            position: &#x27;absolute&#x27;,    // fixed-top-left , fixed-top-right
+            debug: false
+        };
+
+        var EmojiManager = this;
+
+
+        /**
+         * Extend object
+         *
+         * @param out
+         * @returns {*|{}}
+         */
+        this.deepExtend = function (out) {
+            out = out || {};
+
+            for (var i = 1; i &#x3C; arguments.length; i++) {
+                var obj = arguments[i];
+
+                if (!obj)
+                    continue;
+
+                for (var key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        if (typeof obj[key] === &#x27;object&#x27;)
+                            out[key] = EmojiManager.deepExtend(out[key], obj[key]);
+                        else
+                            out[key] = obj[key];
+                    }
+                }
+            }
+
+            return out;
+        };
+
+
+        /*
+        Overload default settings on user options
+         */
+        this.settings = this.deepExtend({}, defaultOptions, options);
+        this.firstRun = true;
+
+        this.isBrowser = (typeof window !== &#x27;undefined&#x27;);
+        this.isFirefox = (this.isBrowser &#x26;&#x26; window[&#x27;mozInnerScreenX&#x27;] != null);
+
+        /**
+         * Function to get current caret position
+         *
+         * @param textarea
+         * @param mode
+         * @param options
+         * @returns {{top: number, left: number, height: number}}
+         */
+        this.getCaretCoordinates = function (textarea, mode, options) {
+            var targetElement = textarea;
+
+            // HTML Sanitizer
+            var escapeHTML = function (s) {
+                var obj = document.createElement(&#x27;pre&#x27;);
+                obj[typeof obj.textContent !== &#x27;undefined&#x27; ? &#x27;textContent&#x27; : &#x27;innerText&#x27;] = s;
+                return obj.innerHTML;
+            };
+
+            // Get caret character position.
+            var getCaretPosition = function (element) {
+                var CaretPos = 0;
+                var startpos = -1;
+                var endpos = -1;
+                if (document.selection) {
+                    // IE Support(not yet)
+                    var docRange = document.selection.createRange();
+                    var textRange = document.body.createTextRange();
+                    textRange.moveToElementText(element);
+
+                    var range = textRange.duplicate();
+                    range.setEndPoint(&#x27;EndToStart&#x27;, docRange);
+                    startpos = range.text.length;
+
+                    var rangeEnd = textRange.duplicate();
+                    rangeEnd.setEndPoint(&#x27;EndToEnd&#x27;, docRange);
+                    endpos = rangeEnd.text.length;
+                } else if (element.selectionStart || element.selectionStart == &#x27;0&#x27;) {
+                    // Firefox support
+                    startpos = element.selectionStart;
+                    endpos = element.selectionEnd;
+                }
+                return {start: startpos, end: endpos};
+            };
+
+            // Get element css style.
+            var getStyle = function (element) {
+                return element.currentStyle || document.defaultView.getComputedStyle(element, &#x27;&#x27;);
+            };
+
+            // Get element absolute position
+            var getElementPosition = function (element) {
+                // Get scroll amount.
+                var html = document.documentElement;
+                var body = document.body;
+                var scrollLeft = (body.scrollLeft || html.scrollLeft);
+                var scrollTop = (body.scrollTop || html.scrollTop);
+
+                // Adjust &#x22;IE 2px bug fix&#x22; and scroll amount.
+                var rect = element.getBoundingClientRect();
+                var left = rect.left - html.clientLeft + scrollLeft;
+                var top = rect.top - html.clientTop + scrollTop;
+                var right = rect.right - html.clientLeft + scrollLeft;
+                var bottom = rect.bottom - html.clientTop + scrollTop;
+                return {
+                    left: parseInt(left), top: parseInt(top),
+                    right: parseInt(right), bottom: parseInt(bottom)
+                };
+            };
+
+            /***************************\
+             * Main function start here! *
+             \***************************/
+
+            var undefined;
+            var salt = &#x22;salt.akiroom.com&#x22;;
+            var textAreaPosition = getElementPosition(targetElement);
+            var dummyName = targetElement.id + &#x22;_dummy&#x22;;
+            var dummyTextArea = document.getElementById(dummyName);
+            if (!dummyTextArea) {
+                // Generate dummy textarea.
+                dummyTextArea = document.createElement(&#x22;div&#x22;);
+                dummyTextArea.id = dummyName;
+                var textAreaStyle = getStyle(targetElement)
+                dummyTextArea.style.cssText = textAreaStyle.cssText;
+
+                // Fix for browser differece.
+                var isWordWrap = false;
+                if (targetElement.wrap == &#x22;off&#x22;) {
+                    // chrome, firefox wordwrap=off
+                    dummyTextArea.style.overflow = &#x22;auto&#x22;;
+                    dummyTextArea.style.whiteSpace = &#x22;pre&#x22;;
+                    isWordWrap = false;
+                } else if (targetElement.wrap == undefined) {
+                    if (textAreaStyle.wordWrap == &#x22;break-word&#x22;)
+                    // safari, wordwrap=on
+                        isWordWrap = true;
+                    else
+                    // safari, wordwrap=off
+                        isWordWrap = false;
+                } else {
+                    // firefox wordwrap=on
+                    dummyTextArea.style.overflowY = &#x22;auto&#x22;;
+                    isWordWrap = true;
+                }
+                dummyTextArea.style.visibility = &#x27;hidden&#x27;;
+                dummyTextArea.style.position = &#x27;absolute&#x27;;
+                dummyTextArea.style.top = &#x27;0px&#x27;;
+                dummyTextArea.style.left = &#x27;0px&#x27;;
+
+                // Firefox Support
+                dummyTextArea.style.width = textAreaStyle.width;
+                dummyTextArea.style.height = textAreaStyle.height;
+                dummyTextArea.style.fontSize = textAreaStyle.fontSize;
+                dummyTextArea.style.maxWidth = textAreaStyle.width;
+                dummyTextArea.style.backgroundColor = textAreaStyle.backgroundColor;
+                dummyTextArea.style.fontFamily = textAreaStyle.fontFamily;
+
+                targetElement.parentNode.appendChild(dummyTextArea);
+            }
+
+            // Set scroll amount to dummy textarea.
+            dummyTextArea.scrollLeft = targetElement.scrollLeft;
+            dummyTextArea.scrollTop = targetElement.scrollTop;
+
+            // Set code strings.
+            var codeStr = options.isDiv ? EmojiManager.gabi_content(targetElement) : targetElement.value;
+
+            // Get caret character position.
+            var selPos = getCaretPosition(targetElement);
+            var leftText = codeStr.slice(0, selPos.start);
+            var selText = codeStr.slice(selPos.start, selPos.end);
+            var rightText = codeStr.slice(selPos.end, codeStr.length);
+            if (selText == &#x27;&#x27;) selText = &#x22;a&#x22;;
+
+            // Set keyed text.
+            var processText = function (text) {
+                // Get array of [Character reference] or [Character] or [NewLine].
+                var m = escapeHTML(text).match(/((&#x26;amp;|&#x26;lt;|&#x26;gt;|&#x26;#34;|&#x26;#39;)|.|\n)/g);
+                if (m)
+                    return m.join(&#x27;&#x3C;wbr&#x3E;&#x27;).replace(/\n/g, &#x27;&#x3C;br&#x3E;&#x27;);
+                else
+                    return &#x27;&#x27;;
+            };
+
+            // Set calculation text for in dummy text area.
+            dummyTextArea.innerHTML = (processText(leftText) +
+                &#x27;&#x3C;wbr&#x3E;&#x3C;span id=&#x22;&#x27; + dummyName + &#x27;_i&#x22;&#x3E;&#x27; + processText(selText) + &#x27;&#x3C;/span&#x3E;&#x3C;wbr&#x3E;&#x27; +
+                processText(rightText));
+
+            // Get caret absolutely pixel position.
+            var dummyTextAreaPos = getElementPosition(dummyTextArea);
+            var caretPos = getElementPosition(document.getElementById(dummyName + &#x22;_i&#x22;));
+            switch (mode) {
+                case &#x27;self&#x27;:
+                    // Return absolutely pixel position - (0,0) is most top-left of TEXTAREA.
+                    return {left: caretPos.left - dummyTextAreaPos.left, top: caretPos.top - dummyTextAreaPos.top};
+                case &#x27;body&#x27;:
+                case &#x27;screen&#x27;:
+                case &#x27;stage&#x27;:
+                case &#x27;page&#x27;:
+                default:
+                    // Return absolutely pixel position - (0,0) is most top-left of PAGE.
+                    return {
+                        left: textAreaPosition.left + caretPos.left - dummyTextAreaPos.left,
+                        top: textAreaPosition.top + caretPos.top - dummyTextAreaPos.top
+                    };
+            }
+        };
+
+
+        /**
+         * Get content of element
+         * @param element
+         * @returns {*|string}
+         */
+        this.gabi_content = function (element) {
+            return element.innerText || element.textContent;
+        };
+
+
+        /**
+         * Replace last occurence of string with new one
+         * @param badtext
+         * @param str
+         * @param icon
+         * @returns {*}
+         */
+        this.replaceLastText = function (badtext, str, icon) {
+            var charpos = str.lastIndexOf(badtext);
+            if (charpos &#x3C; 0) return str;
+            var ptone = str.substring(0, charpos);
+            var pttwo = str.substring(charpos + (badtext.length)).slice(0, -4);
+            return (ptone + icon + pttwo);
+        };
+
+
+        /**
+         * Set caret to end position of content editable
+         * @param contentEditableElement
+         */
+        this.setEndOfContenteditable = function (contentEditableElement) {
+            var range, selection;
+            if (document.createRange)//Firefox, Chrome, Opera, Safari, IE 9+
+            {
+                range = document.createRange();//Create a range (a range is a like the selection but invisible)
+                range.selectNodeContents(contentEditableElement);//Select the entire contents of the element with the range
+                range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
+                selection = window.getSelection();//get the selection object (allows you to change selection)
+                selection.removeAllRanges();//remove any selections already made
+                selection.addRange(range);//make the range you have just created the visible selection
+            }
+            else if (document.selection)//IE 8 and lower
+            {
+                range = document.body.createTextRange();//Create a range (a range is a like the selection but invisible)
+                range.moveToElementText(contentEditableElement);//Select the entire contents of the element with the range
+                range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
+                range.select();//Select the range (make it the visible selection
+            }
+        };
+
+
+        /**
+         * Select editor element with class search emoji
+         * @type {HTMLElement | null}
+         */
+        this.build = function () {
+
+
+            var searchEmoji = document.querySelector(EmojiManager.settings.selector),
+                settings = EmojiManager.settings;
+
+            searchEmoji.addEventListener(&#x22;click&#x22;, function () {
+                if (EmojiManager.firstRun) {
+
+                    EmojiManager.firstRun = false;
+
+                    if(document.querySelector(&#x22;#chooseEmoji&#x22;) === null) {
+                        var chooserDiv = document.createElement(&#x27;div&#x27;);
+                        chooserDiv.setAttribute(&#x27;id&#x27;, &#x27;chooseEmoji&#x27;);
+                        document.querySelector(&#x27;body&#x27;).appendChild(chooserDiv);
+                    }
+
+                    this.innerHTML = &#x27;&#x27;;
+                }
+            });
+
+
+            /*
+            Add event listener to event
+             */
+            searchEmoji.addEventListener(&#x22;input&#x22;, function (e) {
+
+
+
+                /*
+                @Todo : add input field support
+                 */
+                var tagName = this.tagName.toLowerCase(),
+                    isDiv = (tagName === &#x27;div&#x27;),
+                    isInput = (tagName === &#x27;input&#x27;),
+                    allValue = isDiv ? EmojiManager.gabi_content(this).trim() : this.value,
+                    allHtml = this.innerHTML,
+                    lastSpace = allValue.lastIndexOf(&#x22; &#x22;),
+                    typedValue = allValue.substring(lastSpace + 1).toLowerCase().replace(&#x22;&#x3C;br/&#x3E;&#x22;, &#x22;&#x22;),
+                    chooseEmoji = document.getElementById(&#x22;chooseEmoji&#x22;),
+                    foundedOne = false,
+                    counter = 0,
+                    isEnglish = /[^A-Za-z0-9]/g.test(typedValue);
+
+
+                /*
+                 Make list empty and search for emoji
+                 */
+                chooseEmoji.innerHTML = &#x27;&#x3C;div style=&#x22;background:&#x27; + settings.background + &#x27;;&#x27; + settings.textColor + &#x27;;&#x22; class=&#x22;titleOfBlock &#x27; + ((settings.draggable) ? &#x22;draggableTitle&#x22; : &#x22;&#x22;) + ((settings.rtl) ? &#x22; emojiIsRTL&#x22; : &#x22;&#x22;) + &#x27;&#x22;&#x3E;&#x27; + settings.title + &#x27;&#x3C;span class=&#x22;closeEmojiChooser&#x22;&#x3E;&#xD7;&#x3C;/span&#x3E;&#x3C;/div&#x3E;&#x3C;ul&#x3E;&#x3C;/ul&#x3E;&#x27;;
+
+                for (var i = Object.keys(jsonOfEmojies).length - 1; i &#x3E;= 0; i--) {
+                    var keywordName = (!isEnglish ? jsonOfEmojies[i].keywords : jsonOfEmojies[i].faKeywords);
+
+                    if (
+                        typedValue.length &#x3E; 0 &#x26;&#x26;
+                        (
+                            (!isEnglish &#x26;&#x26; jsonOfEmojies[i].keywords.indexOf(typedValue) &#x3E; -1) ||
+                            (isEnglish &#x26;&#x26; jsonOfEmojies[i].faKeywords.indexOf(typedValue) &#x3E; -1)
+                        ) &#x26;&#x26;
+                        counter &#x3C; 12
+                    ) {
+                        foundedOne = true;
+                        counter++;
+
+
+                        var li = document.createElement(&#x22;li&#x22;),
+                            emojiCode = &#x22;&#x3C;span class=&#x27;ec ec-&#x22; + jsonOfEmojies[i].name + &#x22;&#x27;&#x3E;&#x3C;/span&#x3E;&#x22;;
+
+                        li.dataset.name = jsonOfEmojies[i].name;
+                        li.dataset.content = jsonOfEmojies[i].content;
+                        li.title = keywordName;
+                        li.innerHTML = emojiCode + keywordName;
+                        chooseEmoji.querySelector(&#x22;ul&#x22;).appendChild(li);
+
+                        // click on emoji li
+                        li.addEventListener(&#x22;click&#x22;, function () {
+
+                            EmojiManager.settings.afterChoose(this.dataset.name, this);
+
+                            var iconSpan = document.createElement(&#x22;span&#x22;),
+                                newIcon = &#x22;&#x3C;span class=&#x27;ec ec-&#x22; + this.dataset.name + &#x22;&#x27; &#x3E;&#x3C;/span&#x3E;&#x22;;
+
+                            iconSpan.className = &#x22;ec ec-&#x22; + this.dataset.name;
+                            chooseEmoji.style.display = &#x22;none&#x22;;
+
+
+                            // replace old value with
+                            if (isDiv) {
+                                searchEmoji.innerHTML = EmojiManager.replaceLastText(typedValue, allHtml, newIcon);
+                            } else {
+                                searchEmoji.value = EmojiManager.replaceLastText(typedValue, allValue, this.dataset.content);
+                            }
+
+                            EmojiManager.setEndOfContenteditable(searchEmoji);
+
+                        });
+                    }
+                }
+
+
+                /*
+                If emoji founded show choosing menu
+                */
+                if (foundedOne) {
+
+                    // show the chooser
+                    chooseEmoji.style.display = &#x22;block&#x22;;
+
+                    var topSpace, leftSpace , bottomSpace , rightSpace;
+
+
+                    // set position
+                    switch (settings.position) {
+                        case &#x22;absolute&#x22; :
+
+                            var caret = EmojiManager.getCaretCoordinates(this, &#x27;body&#x27;, {
+                                    isDiv: isDiv,
+                                    isInput: isInput
+                                }),
+                                screenWidth = window.innerWidth
+                                    || document.documentElement.clientWidth
+                                    || document.body.clientWidth ,
+                                menuWidth = chooseEmoji.clientWidth || chooseEmoji.offsetWidth,
+                                newPlaceOfLeft = caret[&#x27;left&#x27;] - menuWidth;
+
+
+                            /*
+                            Do not let suggest menu out of screen
+                             */
+                            if (screenWidth - newPlaceOfLeft &#x3C; 0) {
+                                newPlaceOfLeft = screenWidth - menuWidth - 10;   // leftest place of page
+                            }
+
+
+                            topSpace = parseInt(caret[&#x27;top&#x27;]) + 30 + &#x27;px&#x27;;
+                            leftSpace = newPlaceOfLeft + &#x27;px&#x27;;
+                            bottomSpace = null;
+                            rightSpace = null;
+
+                            chooseEmoji.style.position = &#x27;absolute&#x27;;
+
+                            break;
+
+                        case &#x22;fixed-top-right&#x22; :
+                            chooseEmoji.style.position = &#x27;fixed&#x27;;
+                            bottomSpace = null;
+                            rightSpace = &#x27;15px&#x27;;
+                            topSpace = &#x27;10px&#x27;;
+                            leftSpace = &#x27;auto&#x27;;
+                            break;
+                        case &#x22;fixed-top-left&#x22;:
+                            chooseEmoji.style.position = &#x27;fixed&#x27;;
+                            bottomSpace = null;
+                            rightSpace = null;
+                            topSpace = &#x27;10px&#x27;;
+                            leftSpace = &#x27;10px&#x27;;
+                            break;
+                        case &#x22;fixed-bottom-right&#x22;:
+                            chooseEmoji.style.position = &#x27;fixed&#x27;;
+                            bottomSpace = &#x27;15px&#x27;;
+                            rightSpace = &#x27;15px&#x27;;
+                            topSpace = null;
+                            leftSpace = null;
+                            break;
+                        case &#x22;fixed-bottom-left&#x22;:
+                            chooseEmoji.style.position = &#x27;fixed&#x27;;
+                            bottomSpace = &#x27;15px&#x27;;
+                            rightSpace = null;
+                            topSpace = null;
+                            leftSpace = &#x27;10px&#x27;;
+                            break;
+                        default:
+                            chooseEmoji.style.position = &#x27;fixed&#x27;;
+                            topSpace = &#x27;10px&#x27;;
+                            leftSpace = &#x27;10px&#x27;;
+                            bottomSpace = null;
+                            rightSpace = null;
+
+                            break;
+                    }
+
+                    chooseEmoji.style.top = topSpace;
+                    chooseEmoji.style.left = leftSpace;
+                    chooseEmoji.style.bottom = bottomSpace;
+                    chooseEmoji.style.right = rightSpace;
+
+
+                    EmojiManager.settings.afterMenuShow(chooseEmoji);
+
+
+                    /*
+                    Handle close menu
+                     */
+                    chooseEmoji.querySelector(&#x22;.closeEmojiChooser&#x22;).addEventListener(&#x22;click&#x22;, function () {
+                        EmojiManager.settings.afterClose();
+                        chooseEmoji.innerText = &#x27;&#x27;;
+                    });
+
+
+                } else {
+                    chooseEmoji.innerHTML = &#x27;&#x27;;
+                    chooseEmoji.style.display = &#x27;none&#x27;;
+                }
+
+
+                /*
+                Enable draggable to selector
+                 */
+                if (settings.draggable) {
+                    (function () {
+                        var initX, initY, firstX, firstY;
+
+                        chooseEmoji.addEventListener(&#x27;mousedown&#x27;, function (e) {
+                            e.preventDefault();
+                            initX = this.offsetLeft;
+                            initY = this.offsetTop;
+                            firstX = e.pageX;
+                            firstY = e.pageY;
+
+                            this.addEventListener(&#x27;mousemove&#x27;, dragIt, false);
+
+                            window.addEventListener(&#x27;mouseup&#x27;, function () {
+                                chooseEmoji.removeEventListener(&#x27;mousemove&#x27;, dragIt, false);
+                            }, false);
+
+                        }, false);
+
+
+                        // mobile device support
+                        chooseEmoji.addEventListener(&#x27;touchstart&#x27;, function (e) {
+                            e.preventDefault();
+                            initX = this.offsetLeft;
+                            initY = this.offsetTop;
+                            var touch = e.touches;
+                            firstX = touch[0].pageX;
+                            firstY = touch[0].pageY;
+
+                            this.addEventListener(&#x27;touchmove&#x27;, swipeIt, false);
+
+                            window.addEventListener(&#x27;touchend&#x27;, function (e) {
+                                e.preventDefault();
+                                chooseEmoji.removeEventListener(&#x27;touchmove&#x27;, swipeIt, false);
+                            }, false);
+
+                        }, false);
+
+                        function dragIt(e) {
+                            this.style.left = initX + e.pageX - firstX + &#x27;px&#x27;;
+                            this.style.top = initY + e.pageY - firstY + &#x27;px&#x27;;
+                        }
+
+                        function swipeIt(e) {
+                            var contact = e.touches;
+                            this.style.left = initX + contact[0].pageX - firstX + &#x27;px&#x27;;
+                            this.style.top = initY + contact[0].pageY - firstY + &#x27;px&#x27;;
+                        }
+                    })();
+                }
+
+
+                // do not let regualar functionality
+                e.preventDefault();
+
+            });
+
+        };
+
+
+        /**
+         * Build emojiManger
+         */
+        this.build();
+
+    };
+
+    if (typeof module !== &#x27;undefined&#x27; &#x26;&#x26; typeof module.exports !== &#x27;undefined&#x27;) {
+        module.exports = Emojimanager;
+    } else if (EmojiManager.isBrowser) {
+        window.Emojimanager = Emojimanager;
+    }
+
+})();
+            </pre>
+            که بخش های مختلف آن را به دقت توضیح خواهیم داد .
+            <br/><br>
+
+            از بخش اصلی کلاس شروع کنیم و ویژگی هایی که به عنوان ورودی دریافت می کند ، که به صورت زیر اجرا شده است :
+            <pre class="js h400">
+/**
+ * Default options of emoji manager
+ * @type {{selector: string, draggable: boolean, title: string, background: string, textColor: string, kindOfSearch: string, afterMenuShow: afterMenuShow, afterChoose: afterChoose, afterClose: afterClose, rtl: boolean, debug: boolean}}
+ */
+var defaultOptions = {
+    selector: &#x27;.searchEmoji&#x27;,
+    draggable: true,
+    title: &#x27;&#x627;&#x646;&#x62A;&#x62E;&#x627;&#x628; &#x634;&#x6A9;&#x644;&#x6A9;&#x27;,
+    background: &#x27;#F00000&#x27;,
+    textColor: &#x27;#fff&#x27;,
+    kindOfSearch: &#x27;all&#x27;,   // first , end
+    afterMenuShow: function () {},
+    afterChoose: function () {},
+    afterClose: function () {},
+    rtl: true,
+    position: &#x27;absolute&#x27;,    // fixed-top-left , fixed-top-right
+    debug: false
+};
+
+var EmojiManager = this;
+
+
+/**
+ * Extend object
+ *
+ * @param out
+ * @returns {*|{}}
+ */
+this.deepExtend = function (out) {
+    out = out || {};
+
+    for (var i = 1; i &#x3C; arguments.length; i++) {
+        var obj = arguments[i];
+
+        if (!obj)
+            continue;
+
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                if (typeof obj[key] === &#x27;object&#x27;)
+                    out[key] = EmojiManager.deepExtend(out[key], obj[key]);
+                else
+                    out[key] = obj[key];
+            }
+        }
+    }
+
+    return out;
+};
+
+
+/*
+Overload default settings on user options
+ */
+this.settings = this.deepExtend({}, defaultOptions, options);
+this.firstRun = true;
+
+this.isBrowser = (typeof window !== &#x27;undefined&#x27;);
+this.isFirefox = (this.isBrowser &#x26;&#x26; window[&#x27;mozInnerScreenX&#x27;] != null);
+            </pre>
+            توضیح ویژگی ها :
+            <ul>
+                <li>            بخش سلکتور ، تخصیص دهنده انتخاب گر المنت برای فعال شدن امکان انتخاب شکلک برای آن را محقق می سازد</li>
+                <li>بخش draggable امکان جابجایی پنجره انتخاب شکلک را فراهم میکند</li>
+                <li>title عنوان پنجره انتخاب شکلک را شخصی سازی میکند</li>
+                <li>background , color رنگ بندی پنجره را مدیریت میکنند</li>
+                <li>afterMenuShow ، afterChoose ، afterClose توابعی هستند که به ترتیب پس از نمایش منو ، پس از انتخاب شکلک و پس از بسته شدن منوی انتخاب شکلک با یکسری ورودی اجرا میشوند</li>
+                <li>rtl راست چین بودن منو را بررسی میکند</li>
+                <li>position جایگیری منو را مشخص میکند . اگر داده نشود یا absolute باشد براساس مکان موقعیت سنج متن و نزدیک به آن با یک الگوریتمی نمایش داده میشود ولی در صورت انتخاب مقادیر fixed-*-* که * ها جایگیری های چهارگوشه تصویر هستند . منو به صورت ثابت به یکی از چهارگوشه صفحه ، براساس تنظیم کاربر چسبیده میشود.</li>
+                <li>debug نیز امکان دیباگ را برای کاربر فراهم میکند</li>
+
+            </ul>
+
+            این ویژگی های پیش فرض با تنظیم کاربر برای هر آبجکت از کلاس extend شده و تنظیمات اولیه سیستم را فراهم می آورند. برای داشتن اطلاعاتی کلی فیلدهای isBrowser , firstRun رو هم قرار داده ایم که استفاده میشود.
+
+            <br>
+            متد getCordinates :
+
+
+
+
+        
+			<br/>
+			یک نکته دیگه که علاوه بر نکات موجود در بخش <b>بالای صفحه</b> ، در این سیستم وجود دارد این است که کاربر می تواند با کلیک روی یک سطر آن را انتخاب نموده و با اعمال کردن مرتب سازی های مختلف آن سطر را در موقعیت های مختلف بررسی نماید .
+
+			<h2>دمو</h2>
+			برای مشاهده دمو روی لینک زیر کلیک کنید :
+			<a href="../Source/index.html" title="demo" target="_blank">Demo</a>
+			<br/>
+			<br/>
+		</section>
+
+
+		
+        <!-- add basic CodeMirror functionality -->
+        <script src="files/jquery.min.js" ></script>
+        <link rel="stylesheet" href="files/codemirror-5.14.2/lib/codemirror.css" />
+        <link rel="stylesheet" href="files/codemirror-5.14.2/theme/ambiance.css">
+        <script src="files/codemirror-5.14.2/lib/codemirror.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- add Javascript-mode dependencies -->
+        <script src="files/codemirror-5.14.2/mode/javascript/javascript.js" type="text/javascript" charset="utf-8"></script>
+        <script src="files/codemirror-5.14.2/mode/xml/xml.js" type="text/javascript" charset="utf-8"></script>
+        <script src="files/codemirror-5.14.2/mode/htmlmixed/htmlmixed.js" type="text/javascript" charset="utf-8"></script>
+        <script src="files/codemirror-5.14.2/mode/css/css.js" type="text/javascript" charset="utf-8"></script>
+
+
+
+		<script type="text/javascript">
+
+		var panels = {};
+		var numPanels = 0 ;
+		$(document).ready(function () {
+			$("pre.html").each(function(){
+				var value = $(this).text();
+				$(this).empty();
+				window.i = CodeMirror($(this).get(0), {
+			        value: value,
+					mode: "text/html",
+			        readOnly: true,
+					theme: "ambiance" ,
+			        styleActiveLine: true,
+			        lineNumbers: true,
+					lineWrapping: false
+				});
+			});
+
+			$("pre.js").each(function(){
+				var value = $(this).text();
+				$(this).empty();
+				window.i = CodeMirror($(this).get(0), {
+			        value: value,
+					mode: "text/javascript",
+			        readOnly: true,
+					theme: "ambiance" ,
+			        styleActiveLine: true,
+			        lineNumbers: true,
+					lineWrapping: false
+				});
+			});
+		});
+
+	   </script>
+	
+	</body>
+</html>
