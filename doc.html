@@ -996,7 +996,45 @@ this.isFirefox = (this.isBrowser &#x26;&#x26; window[&#x27;mozInnerScreenX&#x27;
             این ویژگی های پیش فرض با تنظیم کاربر برای هر آبجکت از کلاس extend شده و تنظیمات اولیه سیستم را فراهم می آورند. برای داشتن اطلاعاتی کلی فیلدهای isBrowser , firstRun رو هم قرار داده ایم که استفاده میشود.
 
             <br>
-            متد getCordinates :
+            متد getCordinates : 
+	    <pre class="js h300">
+/**
+* Function to get current caret position
+*
+* @param textarea
+* @param mode
+* @param options
+* @returns {{top: number, left: number, height: number}}
+*/
+this.getCaretCoordinates = function (textarea, mode, options) {
+	// ...
+};
+	    </pre>
+	    این متد برای بدست آوردن موقعیت caret (نشانگر تایپ) در صفحه است که در position , 'absolute' مورد استفاده قرار میگیرد.
+	    <br/><br/>
+	    متد gabi_content :
+	    <pre class="js h300">
+/**
+ * Get content of element
+ * @param element
+ * @returns {*|string}
+ */
+this.gabi_content = function (element) {
+    return element.innerText || element.textContent;
+};
+	    </pre>
+	    این متد برای تبدیل کدهای html داخل تگ هایی که contentEditable هستند به معادل transpose شده هست که بتوانیم اندازه کنیم .
+	    
+	    <br/><br/>
+	    
+        /**
+         * Replace last occurence of string with new one
+         * @param badtext
+         * @param str
+         * @param icon
+         * @returns {*}
+         */
+        this.replaceLastText = function (badtext, str, icon) {
 
 
 
